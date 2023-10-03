@@ -73,7 +73,8 @@ while True:
     i = (i + 1) % 10
     Vprom,Irms,Papp = circuit(adc,Sensibility,Vrms)
     Pacu = Pacu + Papp
-    temp.set_values([int(Papp)], notify=i == 0, indicate=False)
+    print(Pacu)
+    temp.set_values([int(Pacu)], notify=False, indicate=False)
     # Random walk the temperature.
 
     time.sleep_ms(1000)

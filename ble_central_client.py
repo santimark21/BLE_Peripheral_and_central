@@ -7,6 +7,28 @@ import time
 import sys
 from simpleBLE import BLECentral
 from machine import deepsleep
+from machine import reset
+from machine import Pin
+# librerias para el MQTT
+import urequests
+from micropython import const
+from utime import sleep_ms
+import json
+import random
+
+
+def showData(data):
+    global done_flag
+    print(data)
+    done_flag=True
+    if button_pin.value()==1:
+        deepsleep(1000)
+
+done_flag=False
+BUTTON=0
+button_pin = Pin(BUTTON, Pin.IN)
+
+
 
 # Bluetooth object
 ble = bluetooth.BLE()
@@ -34,28 +56,36 @@ def on_scan(addr_type, addr, name):
 central.scan(callback=on_scan)
 
 # Wait for connection...
-while not central.is_connected():
+attempts=0
+while True:
     time.sleep_ms(100)
-    if not_found:
-        sys.exit()
-
+    if central.is_connected():
+        break;
+    else:
+        attempts=attempts+1
+        if attempts==100:
+            reset()
+            
 print("Connected")
 
 central.on_notify(callback= lambda data :print('Notified') )
 
 # Explicitly issue reads, using "print" as the callback.
-while central.is_connected():
-    central.read(callback=lambda data: print(data[0]/3600000))
-    time.sleep_ms(1000)
-    print('esta es la potencia compae, a mimir')
-    #sleep for 1 second (1000 milliseconds)
-    deepsleep(1000)
+#while central.is_connected():
+central.read(callback=lambda data: print(data[0]/3600000))
+time.sleep_ms(1000)
+print('esta es la potencia compae, a mimir')
 
+
+    
+    #sleep for 1 second (1000 milliseconds)
+    #deepsleep(1000)
+while not done_flag:
+    pass
 # Alternative to the above, just show the most recently notified value.
 # while central.is_connected():
 #     print(central.value())
 #     time.sleep_ms(2000)
 
-print("Disconnected")
 
 
